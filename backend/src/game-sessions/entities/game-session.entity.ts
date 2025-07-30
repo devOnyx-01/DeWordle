@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Game } from '../../games/entities/game.entity';
-import { User } from '../../auth/entities/user.entity';
+import { User } from 'src/auth/entities/user.entity';
 import { GuessHistory } from './guess-history.entity';
 import { GameSessionStatus } from '../game-sessions.constants';
 
@@ -27,6 +27,9 @@ export class GameSession {
 
   @Column()
   durationSeconds: number;
+
+  @Column({ type: 'enum', enum: GameSessionStatus, default: GameSessionStatus.IN_PROGRESS })
+  status: GameSessionStatus;
 
   @Column('json', { nullable: true })
   metadata: Record<string, any>;

@@ -11,6 +11,7 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { User } from '../auth/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LeaderboardService } from '../leaderboard/leaderboard.service';
+import { submitGuessProvider } from './providers/submit-guess';
 import { WordsService } from '../dewordle/words/words.service';
 import { WordValidationService } from '../dewordle/words/word-validation.service';
 import { CreateGuessDto } from './dto/create-guess.dto';
@@ -27,6 +28,7 @@ export class GameSessionsService {
     private gameRepo: Repository<Game>,
     private eventEmitter: EventEmitter2,
     private leaderboardService: LeaderboardService,
+    private submitGuessProvider: submitGuessProvider,
     private wordService: WordsService,
     private wordValidationService: WordValidationService,
     @InjectRepository(GuessHistory)
@@ -100,7 +102,10 @@ export class GameSessionsService {
     }
 
     return [];
-  }
+  
+    
+  public async submitGuess(sessionId: number, guess: string, user: User | null) {
+    this.submitGuessProvider.submitGuess(sessionId, guess, user)
 
   /**
    * Attempt a guess for a specific session
