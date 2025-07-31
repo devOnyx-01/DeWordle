@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import type React from "react";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 type ModalProps = {
   closeModal: () => void;
@@ -11,17 +11,17 @@ export function LoginForm({ closeModal }: ModalProps) {
   const { login, signup } = useAuth();
   const [isSignup, setIsSignup] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
+    email: "",
+    password: "",
+    username: "",
   });
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
@@ -32,7 +32,7 @@ export function LoginForm({ closeModal }: ModalProps) {
         closeModal();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +45,13 @@ export function LoginForm({ closeModal }: ModalProps) {
           className="rounded-3xl p-8 shadow-2xl"
           style={{
             background:
-              'linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #1a0b3d 100%)',
+              "linear-gradient(135deg, #1a0b3d 0%, #2d1b69 50%, #1a0b3d 100%)",
           }}
         >
           {/* Title */}
           <div className="flex justify-between">
             <h1 className="text-4xl font-light text-white mb-12">
-              {isSignup ? 'Sign Up' : 'Login'}
+              {isSignup ? "Sign Up" : "Login"}
             </h1>
             <button
               className="w-8 h-8 p-2 rounded-full bg-black items-center justify-center flex cursor-pointer border"
@@ -142,25 +142,25 @@ export function LoginForm({ closeModal }: ModalProps) {
               className="w-full px-2 h-14 text-lg font-medium rounded-xl transition-all duration-200"
               style={{
                 background:
-                  'linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)',
+                  "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
               }}
             >
-              {isLoading ? 'Loading...' : isSignup ? 'Sign Up' : 'Login'}
+              {isLoading ? "Loading..." : isSignup ? "Sign Up" : "Login"}
             </button>
 
             {/* Switch between Login/Signup */}
             <div className="text-center">
               <span className="text-white text-sm">
                 {isSignup
-                  ? 'Already have an account? '
-                  : 'Already have an account? '}
+                  ? "Already have an account? "
+                  : "Already have an account? "}
               </span>
               <button
                 type="button"
                 onClick={() => setIsSignup(!isSignup)}
                 className="text-purple-300 text-sm hover:text-purple-200 transition-colors underline"
               >
-                {isSignup ? 'Login' : 'Sign Up'}
+                {isSignup ? "Login" : "Sign Up"}
               </button>
             </div>
           </form>
@@ -185,7 +185,7 @@ export function LoginForm({ closeModal }: ModalProps) {
             className="w-full px-2 h-14 bg-transparent border-white/20 text-white hover:bg-white/5 rounded-xl"
             onClick={() => {
               // Add Google OAuth logic here
-              console.log('Google login clicked');
+              console.log("Google login clicked");
             }}
           >
             <div className="flex items-center justify-center space-x-3">
