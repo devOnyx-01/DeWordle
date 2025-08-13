@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment-timezone';
@@ -288,12 +289,31 @@ export class WordsService {
   }
 
   public async createWord(createDto: CreateWordDto): Promise<WordEntity> {
+    // Validate before creation
+    const validation = await this.wordValidationProvider.validateWord(
+      createDto.word,
+    );
+
+    if (!validation.valid) {
+      throw new BadRequestException({
+        message: 'Word validation failed',
+        reasons: validation.reasons,
+      });
+    }
+
+    // Score & save
     const difficulty = this.wordScoringProvider.scoreWord(createDto.word);
-    const word = this.wordRepo.create({ ...createDto, difficulty });
+    const word = this.wordRepo.create({
+      ...createDto,
+      difficulty,
+      definition: validation.definition,
+      sources: validation.sources,
+    });
+
     return this.wordRepo.save(word);
   }
 
   public async validateWord(wordText: string) {
-    return this.wordValidationProvider.validateWord(wordText)
+    return this.wordValidationProvider.validateWord(wordText);
   }
 }
