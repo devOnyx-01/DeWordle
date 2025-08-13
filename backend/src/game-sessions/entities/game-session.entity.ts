@@ -4,10 +4,12 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Game } from '../../games/entities/game.entity';
 import { User } from 'src/auth/entities/user.entity';
-import { GameSessionStatus } from '../enums/sessionStatus';
+import { GuessHistory } from './guess-history.entity';
+import { GameSessionStatus } from '../game-sessions.constants';
 
 @Entity()
 export class GameSession {
@@ -34,4 +36,19 @@ export class GameSession {
 
   @CreateDateColumn()
   playedAt: Date;
+
+  @Column({ length: 5, select: false })
+  solution: string;
+
+  @OneToMany(() => GuessHistory, (guess) => guess.session, {
+    cascade: ['insert'],
+    eager: false,
+  })
+  history: GuessHistory[];
+
+  toJSON() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { solution, ...rest } = this;
+    return rest;
+  }
 }

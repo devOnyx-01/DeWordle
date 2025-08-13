@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { DictionaryHelper, EnrichedWord } from '../../utils/dictionary.helper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Word as WordEntity } from 'src/entities/word.entity';
+import { Word as WordEntity } from '../../entities/word.entity';
 import { WordScoringProvider } from './providers/word-scoring-provider';
 import { CreateWordDto } from './dto/create-word.dto';
 import { WordValidationProvider } from './providers/word-validation-provider';
