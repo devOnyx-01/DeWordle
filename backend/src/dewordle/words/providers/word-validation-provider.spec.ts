@@ -12,7 +12,9 @@ function mockAxiosResponse<T>(data: T): AxiosResponse<T> {
     status: 200,
     statusText: 'OK',
     headers: {},
-    config: {},
+     config: {
+      headers: {},
+    } as any,
   };
 }
 
