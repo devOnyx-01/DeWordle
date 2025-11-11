@@ -1,12 +1,12 @@
 # DeWordle
 
-DeWordle is a decentralized, blockchain-based word-guessing game built on the StarkNet ecosystem. It merges the fun and challenge of Wordle with the transparency and security of blockchain technology.
+DeWordle is a decentralized, blockchain-based word-guessing game built on the Stellar ecosystem. It merges the fun and challenge of Wordle with the transparency and security of blockchain technology.
 
 ## Features
 
 - **Daily Decentralized Word Challenges**: A new word is generated every day and stored securely on-chain.
 - **Transparent Gameplay**: Game logic is stored on the blockchain, ensuring fair and verifiable outcomes.
-- **Wallet Integration**: Compatible with StarkNet wallets like Argent X for gameplay interactions.
+- **Wallet Integration**: Compatible with Stellar wallets like Argent X for gameplay interactions.
 - **On-Chain Rewards**: Players earn tokens or NFTs for successful guesses or streaks.
 - **Leaderboards**: Track top players with a decentralized leaderboard.
 
@@ -16,11 +16,10 @@ DeWordle is a decentralized, blockchain-based word-guessing game built on the St
 
 - **Framework**: Next.js (React-based)
 - **Styling**: Tailwind CSS for a sleek and responsive design.
-- **Wallet Integration**: `starknet.js` for connecting to StarkNet wallets.
 
 ### Smart Contracts
 
-- **Language**: Cairo for StarkNet smart contract development.
+- **Language**: Cairo for Stellar smart contract development.
 - **Features**:
   - On-chain storage for the word of the day.
   - Validation of guesses with feedback on correctness.
@@ -34,7 +33,7 @@ DeWordle is a decentralized, blockchain-based word-guessing game built on the St
 ### Deployment
 
 - **Frontend Hosting**: Vercel for hosting the Next.js application.
-- **Blockchain**: StarkNet for smart contract deployment.
+- **Blockchain**: Stellar for smart contract deployment.
 
 ## Installation
 
@@ -57,13 +56,13 @@ npm run dev
 
 ```bash
 cd contracts
-starknet-compile wordle_contract.cairo --output wordle_contract_compiled.json
+Stellar-compile wordle_contract.cairo --output wordle_contract_compiled.json
 ```
 
 ### Smart Contract Deployment
 
 ```bash
-starknet deploy --contract wordle_contract_compiled.json --network alpha
+Stellar deploy --contract wordle_contract_compiled.json --network alpha
 ```
 
 ### Environment Variables
@@ -71,7 +70,7 @@ starknet deploy --contract wordle_contract_compiled.json --network alpha
 Create a `.env` file in the `frontend` directory with the following variables:
 
 ```
-NEXT_PUBLIC_STARKNET_NETWORK=alpha
+NEXT_PUBLIC_Stellar_NETWORK=alpha
 NEXT_PUBLIC_CONTRACT_ADDRESS=your-deployed-contract-address
 ```
 
@@ -79,7 +78,7 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=your-deployed-contract-address
 
 ```
 dewordle/
-├── contracts/          # StarkNet Cairo contracts
+├── contracts/          # Stellar Cairo contracts
 ├── frontend/           # Next.js application
 ├── README.md           # Project documentation
 └── .env                # Environment variables
@@ -87,7 +86,7 @@ dewordle/
 
 ## Workflow
 
-1. **Login**: Users connect their StarkNet wallet.
+1. **Login**: Users connect their Stellar wallet.
 2. **Play**:
    - Guess the word of the day within 6 attempts.
    - Receive feedback on correct letters and positions.
@@ -96,7 +95,7 @@ dewordle/
 4. **Leaderboard**:
    - Track top players and their achievements on a decentralized leaderboard.
 5. **Blockchain Integration**:
-   - Transactions signed via StarkNet wallets.
+   - Transactions signed via Stellar wallets.
    - Game logic and rewards managed through smart contracts.
 
 ## Development Roadmap
@@ -118,7 +117,7 @@ dewordle/
 
 ### Launch
 
-- Deploy smart contracts on StarkNet mainnet.
+- Deploy smart contracts on Stellar mainnet.
 - Host the application on Vercel or similar services.
 
 ## Contributing
