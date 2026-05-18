@@ -1,4 +1,4 @@
-interface WiktionaryResponse {
+export interface WiktionaryResponse {
   query: {
     pages: {
       [key: string]: {

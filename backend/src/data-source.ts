@@ -6,14 +6,14 @@ import { Word } from './entities/word.entity';
 import { GameSession } from './game-sessions/entities/game-session.entity';
 import { User } from './auth/entities/user.entity';
 import { Game } from './games/entities/game.entity';
-import * as path from 'path';
 import { GuessHistory } from './game-sessions/entities/guess-history.entity';
+import * as path from 'path';
 
-// Load .env.development for local development, fallback to .env
-const envPath =
-  process.env.NODE_ENV === 'production'
-    ? '.env'
-    : path.join(__dirname, '..', '.env.development');
+const envPath = process.env.ENV_FILE_PATH
+  ? path.resolve(process.cwd(), process.env.ENV_FILE_PATH)
+  : process.env.NODE_ENV === 'production'
+    ? path.resolve(process.cwd(), '.env')
+    : path.resolve(process.cwd(), '.env.development');
 
 config({ path: envPath });
 
@@ -35,5 +35,5 @@ export const AppDataSource = new DataSource({
   entities: [TestEntity, Word, Game, User, GameSession, GuessHistory],
   migrations: ['src/migrations/*{.ts,.js}'],
   synchronize: false,
-  logging: true,
+  logging: configService.get('NODE_ENV') === 'development',
 });

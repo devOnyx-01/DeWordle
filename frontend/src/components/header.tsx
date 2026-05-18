@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createAvatar } from '@dicebear/core';
@@ -25,7 +25,6 @@ const navItems = [
 export default function Header() {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuth();
-  const [modal, setModal] = useState(false);
   const isActive = (href: string) => pathname === href;
   const avatar = useMemo(() => {
     return createAvatar(adventurer, {
@@ -71,14 +70,13 @@ export default function Header() {
               <div className="hidden md:flex">
                 <div
                   className="px-6 py-4 rounded-lg border-[0.5px] border-white bg-transparent hover:bg-white/10 text-white font-jakarta text-lg tracking-wide font-medium leading-6"
-                  onClick={() => setModal(true)}
                 >
                   Login / Sign up
                 </div>
               </div>
             </PopoverTrigger>
             <PopoverContent>
-              <LoginForm closeModal={() => setModal(false)} />
+              <LoginForm closeModal={() => undefined} />
             </PopoverContent>
           </Popover>
         )}

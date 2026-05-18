@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '../../auth/entities/user.entity';
 import { Game } from '../../games/entities/game.entity';
 
 @Entity()

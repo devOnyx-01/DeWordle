@@ -1,4 +1,4 @@
-interface OxfordResponse {
+export interface OxfordResponse {
   results: {
     lexicalEntries: {
       entries: {

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserGameStats } from './entities/user-game-stats.entity';
-import { User } from '../user/entities/user.entity';
+import { User } from '../auth/entities/user.entity';
 import { Game } from '../games/entities/game.entity';
 import { startOfDay, subDays } from 'date-fns';
 
