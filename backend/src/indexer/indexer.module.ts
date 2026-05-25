@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { IndexerController } from './indexer.controller';
 import { IndexerService } from './indexer.service';
 import { EventProcessorService } from './processors/event-processor.service';
+import { EventNormalizerService } from './processors/event-normalizer.service';
 import { ProjectionService } from './projections/projection.service';
 import { CursorService } from './projections/cursor.service';
 import { IndexerQueueService } from './queue/indexer-queue.service';
@@ -23,11 +24,12 @@ import { IndexerCursorEntity } from './entities/indexer-cursor.entity';
   providers: [
     IndexerService,
     EventProcessorService,
+    EventNormalizerService,
     ProjectionService,
     CursorService,
     IndexerQueueService,
     IndexerWorkerService,
   ],
-  exports: [IndexerService, ProjectionService, CursorService],
+  exports: [IndexerService, ProjectionService, CursorService, EventNormalizerService],
 })
 export class IndexerModule {}

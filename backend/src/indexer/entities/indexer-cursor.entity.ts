@@ -18,6 +18,9 @@ export class IndexerCursorEntity {
   @Column({ default: '' })
   lastTxHash: string;
 
+  @Column({ default: 0 })
+  lastEventIndex: number;
+
   @UpdateDateColumn()
   updatedAt: Date;
 }

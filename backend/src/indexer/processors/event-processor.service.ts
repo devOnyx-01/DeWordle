@@ -15,7 +15,7 @@ export class EventProcessorService {
     private readonly projectionService: ProjectionService,
   ) {}
 
-  async process(event: IngestedEventDto) {
+  async process(event: IngestedEventDto): Promise<boolean> {
     const exists = await this.eventsRepo.findOne({
       where: {
         network: event.network,
@@ -25,13 +25,12 @@ export class EventProcessorService {
     });
 
     if (exists) {
-      this.logger.debug(
-        `Skipping replayed event ${event.txHash}#${event.eventIndex}`,
-      );
-      return;
+      this.logger.debug(`Skipping replayed event ${event.txHash}#${event.eventIndex}`);
+      return false;
     }
 
     await this.eventsRepo.save(this.eventsRepo.create(event));
     await this.projectionService.apply(event);
+    return true;
   }
 }

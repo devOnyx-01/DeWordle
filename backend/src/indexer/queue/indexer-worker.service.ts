@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { IndexerService } from '../indexer.service';
+import { INDEXER_NETWORK_TESTNET, INDEXER_STREAM_CORE_GAME } from '../indexer.constants';
 import { CursorService } from '../projections/cursor.service';
 
 @Injectable()
@@ -10,13 +12,16 @@ export class IndexerWorkerService {
   constructor(
     private readonly indexerService: IndexerService,
     private readonly cursorService: CursorService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async tick() {
-    const cursor = await this.cursorService.getOrCreate('testnet', 'core_game_events');
+    const network = this.configService.get<string>('SOROBAN_NETWORK') || INDEXER_NETWORK_TESTNET;
+    const cursor = await this.cursorService.getOrCreate(network, INDEXER_STREAM_CORE_GAME);
+
     this.logger.debug(
-      `Indexer worker tick from ledger ${cursor.lastLedger} tx ${cursor.lastTxHash}`,
+      `Indexer worker tick from cursor ${cursor.lastLedger}:${cursor.lastTxHash}:${cursor.lastEventIndex}`,
     );
 
     await this.indexerService.poll();

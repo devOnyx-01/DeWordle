@@ -25,6 +25,7 @@ export class CursorService {
         streamKey,
         lastLedger: 0,
         lastTxHash: '',
+        lastEventIndex: 0,
       }),
     );
   }
@@ -34,10 +35,12 @@ export class CursorService {
     streamKey: string,
     lastLedger: number,
     lastTxHash: string,
+    lastEventIndex: number,
   ) {
     const cursor = await this.getOrCreate(network, streamKey);
     cursor.lastLedger = lastLedger;
     cursor.lastTxHash = lastTxHash;
+    cursor.lastEventIndex = lastEventIndex;
     await this.cursorRepo.save(cursor);
   }
 }
