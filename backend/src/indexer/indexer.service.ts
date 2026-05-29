@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import { IngestedEventDto } from './dto/ingested-event.dto';
 import { EventProcessorService } from './processors/event-processor.service';
 import { EventNormalizerService } from './processors/event-normalizer.service';
@@ -14,6 +15,24 @@ export interface IndexerMetrics {
   projectionErrors: number;
   pollCycles: number;
   lastCursorLedger: number;
+}
+
+export interface IndexerLagSnapshot {
+  network: string;
+  streamKey: string;
+  cursor: {
+    lastLedger: number;
+    lastTxHash: string;
+    lastEventIndex: number;
+    updatedAt?: Date;
+  };
+  lastProcessedTxHash: string;
+  networkLatestLedger: number | null;
+  lagLedgers: number | null;
+  replaySkips: number;
+  ingestedTotal: number;
+  projectionErrors: number;
+  pollCycles: number;
 }
 
 @Injectable()
@@ -66,6 +85,38 @@ export class IndexerService {
       });
       throw err;
     }
+  }
+
+  async getLagSnapshot(): Promise<IndexerLagSnapshot> {
+    const network =
+      (this.configService.get<string>('SOROBAN_NETWORK') as 'testnet' | 'mainnet') ||
+      'testnet';
+    const rpcUrl = this.configService.get<string>('SOROBAN_RPC_URL');
+    const cursor = await this.cursorService.getOrCreate(network, INDEXER_STREAM_CORE_GAME);
+
+    let networkLatestLedger: number | null = null;
+    if (rpcUrl) {
+      networkLatestLedger = await this.fetchLatestLedger(rpcUrl);
+    }
+
+    return {
+      network,
+      streamKey: INDEXER_STREAM_CORE_GAME,
+      cursor: {
+        lastLedger: cursor.lastLedger,
+        lastTxHash: cursor.lastTxHash,
+        lastEventIndex: cursor.lastEventIndex,
+        updatedAt: cursor.updatedAt,
+      },
+      lastProcessedTxHash: cursor.lastTxHash,
+      networkLatestLedger,
+      lagLedgers:
+        networkLatestLedger === null ? null : Math.max(networkLatestLedger - cursor.lastLedger, 0),
+      replaySkips: this.metrics.replaySkips,
+      ingestedTotal: this.metrics.ingestedTotal,
+      projectionErrors: this.metrics.projectionErrors,
+      pollCycles: this.metrics.pollCycles,
+    };
   }
 
   async poll(): Promise<number> {
@@ -121,7 +172,6 @@ export class IndexerService {
     contractId: string,
     afterLedger: number,
   ): Promise<Record<string, unknown>[]> {
-    const { default: axios } = await import('axios');
     const body = {
       jsonrpc: '2.0',
       id: 1,
@@ -138,6 +188,22 @@ export class IndexerService {
     }>(rpcUrl, body, { timeout: 10_000 });
 
     return response.data?.result?.events ?? [];
+  }
+
+  async fetchLatestLedger(rpcUrl: string): Promise<number> {
+    const response = await axios.post<{
+      result?: { latestLedger?: number };
+    }>(
+      rpcUrl,
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getHealth',
+      },
+      { timeout: 10_000 },
+    );
+
+    return response.data?.result?.latestLedger ?? 0;
   }
 
   recordReplaySkip(ledger: number, txHash: string, eventIndex: number) {
