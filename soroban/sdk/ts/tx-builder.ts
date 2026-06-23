@@ -1,11 +1,12 @@
 import {
+  Account,
   Contract,
   TransactionBuilder,
   TimeoutInfinite,
   type Transaction,
   xdr,
 } from "@stellar/stellar-sdk";
-import type { Account, Server, SendTransactionResponse } from "@stellar/stellar-sdk/rpc";
+import { Api, Server, assembleTransaction } from "@stellar/stellar-sdk/rpc";
 import type { SorobanNetworkConfig } from "./network";
 
 export async function buildContractTx(params: {
@@ -34,22 +35,22 @@ export async function simulateAndAssemble(params: {
   tx: Transaction;
 }) {
   const simulated = await params.server.simulateTransaction(params.tx);
-  if (simulated.error) {
+  if (Api.isSimulationError(simulated)) {
     throw new Error(`Simulation failed: ${simulated.error}`);
   }
 
-  const assembled = params.server.assembleTransaction(params.tx, simulated).build();
+  const assembled = assembleTransaction(params.tx, simulated).build();
   return { simulated, assembled };
 }
 
 export async function submitTransaction(params: {
   server: Server;
   tx: Transaction;
-}): Promise<SendTransactionResponse> {
+}): Promise<Api.SendTransactionResponse> {
   const sent = await params.server.sendTransaction(params.tx);
 
   if (sent.status === "ERROR") {
-    throw new Error(sent.errorResultXdr || "Transaction submit failed");
+    throw new Error(sent.errorResult?.toXDR("base64") || "Transaction submit failed");
   }
 
   return sent;
@@ -89,7 +90,7 @@ export async function pollTransaction(params: {
       return {
         status: "SUCCESS",
         txHash,
-        resultXdr: (response as { resultXdr?: string }).resultXdr,
+        resultXdr: response.resultXdr.toXDR("base64"),
       };
     }
 
@@ -97,7 +98,7 @@ export async function pollTransaction(params: {
       return {
         status: "FAILED",
         txHash,
-        errorResultXdr: (response as { errorResultXdr?: string }).errorResultXdr,
+        errorResultXdr: response.resultXdr.toXDR("base64"),
       };
     }
 
@@ -143,7 +144,11 @@ export async function submitSignedTx(params: {
   const sent = await submitTransaction({ server, tx });
 
   if (sent.status === "ERROR") {
-    return { status: "FAILED", txHash: sent.hash, errorResultXdr: sent.errorResultXdr };
+    return {
+      status: "FAILED",
+      txHash: sent.hash,
+      errorResultXdr: sent.errorResult?.toXDR("base64"),
+    };
   }
 
   return pollTransaction({ server, txHash: sent.hash, maxAttempts, intervalMs });

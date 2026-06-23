@@ -147,72 +147,77 @@ mod tests {
     use super::*;
     use soroban_sdk::testutils::Address as _;
 
-    fn setup() -> (Env, Address) {
+    fn setup() -> (Env, Address, Address) {
         let env = Env::default();
         env.mock_all_auths();
         let admin = Address::generate(&env);
-        RewardsContract::init(env.clone(), admin.clone());
-        (env, admin)
+        let contract_id = env.register(RewardsContract, ());
+        let client = RewardsContractClient::new(&env, &contract_id);
+        client.init(&admin);
+        (env, admin, contract_id)
     }
 
     #[test]
     #[should_panic]
     fn init_twice_panics() {
-        let (env, admin) = setup();
-        RewardsContract::init(env, admin);
+        let (env, admin, contract_id) = setup();
+        let client = RewardsContractClient::new(&env, &contract_id);
+        client.init(&admin);
     }
 
     #[test]
     fn accrue_and_balance() {
-        let (env, _) = setup();
+        let (env, _, contract_id) = setup();
+        let client = RewardsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
         let reason = Symbol::new(&env, "win");
-        RewardsContract::accrue(env.clone(), player.clone(), 100, 1, reason);
-        assert_eq!(RewardsContract::balance_of(env, player), 100);
+        client.accrue(&player, &100, &1, &reason);
+        assert_eq!(client.balance_of(&player), 100);
     }
 
     #[test]
     #[should_panic]
     fn nonce_replay_panics() {
-        let (env, _) = setup();
+        let (env, _, contract_id) = setup();
+        let client = RewardsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
         let reason = Symbol::new(&env, "win");
-        RewardsContract::accrue(env.clone(), player.clone(), 100, 1, reason.clone());
-        RewardsContract::accrue(env, player, 100, 1, reason);
+        client.accrue(&player, &100, &1, &reason);
+        client.accrue(&player, &100, &1, &reason);
     }
 
     #[test]
     fn claim_resets_balance_and_increases_claimed_total() {
-        let (env, _) = setup();
+        let (env, _, contract_id) = setup();
+        let client = RewardsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
         let reason = Symbol::new(&env, "win");
-        RewardsContract::accrue(env.clone(), player.clone(), 50, 1, reason);
-        let claimed = RewardsContract::claim(env.clone(), player.clone());
+        client.accrue(&player, &50, &1, &reason);
+        let claimed = client.claim(&player);
         assert_eq!(claimed, 50);
-        assert_eq!(RewardsContract::balance_of(env.clone(), player.clone()), 0);
-        assert_eq!(RewardsContract::claimed_total(env, player), 50);
+        assert_eq!(client.balance_of(&player), 0);
+        assert_eq!(client.claimed_total(&player), 50);
     }
 
     #[test]
+    #[should_panic]
     fn non_admin_accrue_rejected() {
         let env = Env::default();
         let admin = Address::generate(&env);
-        RewardsContract::init(env.clone(), admin);
-        // Without mock_all_auths, admin.require_auth() will panic for non-admin caller
+        let contract_id = env.register(RewardsContract, ());
+        let client = RewardsContractClient::new(&env, &contract_id);
+        client.init(&admin);
         let player = Address::generate(&env);
         let reason = Symbol::new(&env, "win");
-        // This should panic because auth is not mocked
-        let result = std::panic::catch_unwind(|| {
-            RewardsContract::accrue(env.clone(), player, 100, 1, reason);
-        });
-        assert!(result.is_err());
+        client.accrue(&player, &100, &1, &reason);
     }
 
     #[test]
     fn emission_config_read_write() {
-        let (env, _) = setup();
-        RewardsContract::set_emission(env.clone(), 1, 100, 10);
-        let cfg = RewardsContract::get_emission(env, 1).unwrap();
+        let (env, _, contract_id) = setup();
+        let client = RewardsContractClient::new(&env, &contract_id);
+        client.set_emission(&1, &100, &10);
+        let cfg = client.get_emission(&1).unwrap();
         assert_eq!(cfg.win_points, 100);
         assert_eq!(cfg.participation_points, 10);
     }

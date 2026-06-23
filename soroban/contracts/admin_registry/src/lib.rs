@@ -95,81 +95,79 @@ mod tests {
     use super::*;
     use soroban_sdk::testutils::Address as _;
 
-    #[test]
-    fn init_sets_admin_and_rejects_double_init() {
+    fn setup() -> (Env, Address, Address) {
         let env = Env::default();
+        env.mock_all_auths();
         let admin = Address::generate(&env);
+        let contract_id = env.register(AdminRegistryContract, ());
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        client.init(&admin);
+        (env, admin, contract_id)
+    }
 
-        AdminRegistryContract::init(env.clone(), admin.clone());
+    #[test]
+    fn init_sets_admin() {
+        let (env, admin, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        assert_eq!(client.get_admin(), admin);
+    }
 
-        // Second init must panic with AlreadyInitialized
-        let result = std::panic::catch_unwind(|| {
-            AdminRegistryContract::init(env.clone(), admin.clone());
-        });
-        assert!(result.is_err());
+    #[test]
+    #[should_panic]
+    fn double_init_panics() {
+        let (env, admin, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        client.init(&admin);
     }
 
     #[test]
     fn set_and_get_contract() {
-        let env = Env::default();
-        env.mock_all_auths();
-        let admin = Address::generate(&env);
+        let (env, _, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
         let contract_addr = Address::generate(&env);
         let key = Symbol::new(&env, "core_game");
 
-        AdminRegistryContract::init(env.clone(), admin);
-        AdminRegistryContract::set_contract(env.clone(), key.clone(), contract_addr.clone());
-
-        let retrieved = AdminRegistryContract::get_contract(env.clone(), key);
+        client.set_contract(&key, &contract_addr);
+        let retrieved = client.get_contract(&key);
         assert_eq!(retrieved, contract_addr);
     }
 
     #[test]
+    #[should_panic]
     fn get_contract_missing_panics() {
-        let env = Env::default();
-        let admin = Address::generate(&env);
-        AdminRegistryContract::init(env.clone(), admin);
-
-        let result = std::panic::catch_unwind(|| {
-            AdminRegistryContract::get_contract(env.clone(), Symbol::new(&env, "missing"));
-        });
-        assert!(result.is_err());
+        let (env, _, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        let missing = Symbol::new(&env, "missing");
+        client.get_contract(&missing);
     }
 
     #[test]
     fn set_and_check_role() {
-        let env = Env::default();
-        env.mock_all_auths();
-        let admin = Address::generate(&env);
+        let (env, _, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
         let member = Address::generate(&env);
         let role = Symbol::new(&env, "pauser");
 
-        AdminRegistryContract::init(env.clone(), admin);
-
-        // Default: no role
-        assert!(!AdminRegistryContract::has_role(env.clone(), role.clone(), member.clone()));
-
-        AdminRegistryContract::set_role(env.clone(), role.clone(), member.clone(), true);
-        assert!(AdminRegistryContract::has_role(env.clone(), role.clone(), member.clone()));
-
-        AdminRegistryContract::set_role(env.clone(), role.clone(), member.clone(), false);
-        assert!(!AdminRegistryContract::has_role(env.clone(), role, member));
+        assert!(!client.has_role(&role, &member));
+        client.set_role(&role, &member, &true);
+        assert!(client.has_role(&role, &member));
+        client.set_role(&role, &member, &false);
+        assert!(!client.has_role(&role, &member));
     }
 
     #[test]
     fn get_admin_returns_initialized_admin() {
-        let env = Env::default();
-        let admin = Address::generate(&env);
-        AdminRegistryContract::init(env.clone(), admin.clone());
-        assert_eq!(AdminRegistryContract::get_admin(env), admin);
+        let (env, admin, contract_id) = setup();
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        assert_eq!(client.get_admin(), admin);
     }
 
     #[test]
+    #[should_panic]
     fn get_admin_before_init_panics() {
         let env = Env::default();
-        let result = std::panic::catch_unwind(|| {
-            AdminRegistryContract::get_admin(env.clone());
-        });
-        assert!(result.is_err());
+        let contract_id = env.register(AdminRegistryContract, ());
+        let client = AdminRegistryContractClient::new(&env, &contract_id);
+        client.get_admin();
     }
 }

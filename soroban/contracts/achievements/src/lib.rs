@@ -137,79 +137,72 @@ mod tests {
     use super::*;
     use soroban_sdk::testutils::Address as _;
 
-    fn setup() -> (Env, Address) {
+    fn setup() -> (Env, Address, Address) {
         let env = Env::default();
         env.mock_all_auths();
         let admin = Address::generate(&env);
-        AchievementsContract::init(env.clone(), admin.clone());
-        (env, admin)
+        let contract_id = env.register(AchievementsContract, ());
+        let client = AchievementsContractClient::new(&env, &contract_id);
+        client.init(&admin);
+        (env, admin, contract_id)
     }
 
-    fn define_achievement(env: &Env, id: &str) {
-        AchievementsContract::define(
-            env.clone(),
-            Symbol::new(env, id),
-            Symbol::new(env, "streak"),
-            5,
-            true,
-        );
+    fn define_achievement(env: &Env, client: &AchievementsContractClient<'_>, id: &str) {
+        client.define(&Symbol::new(env, id), &Symbol::new(env, "streak"), &5, &true);
     }
 
     #[test]
     #[should_panic]
     fn init_twice_panics() {
-        let (env, admin) = setup();
-        AchievementsContract::init(env, admin);
+        let (env, admin, contract_id) = setup();
+        let client = AchievementsContractClient::new(&env, &contract_id);
+        client.init(&admin);
     }
 
     #[test]
     #[should_panic]
     fn unlock_missing_definition_panics() {
-        let (env, _) = setup();
+        let (env, _, contract_id) = setup();
+        let client = AchievementsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
-        AchievementsContract::unlock(env, player, Symbol::new(&env, "missing"), 1);
+        let missing = Symbol::new(&env, "missing");
+        client.unlock(&player, &missing, &1);
     }
 
     #[test]
     #[should_panic]
     fn unlock_nonce_replay_panics() {
-        let (env, _) = setup();
+        let (env, _, contract_id) = setup();
+        let client = AchievementsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
-        define_achievement(&env, "first");
-        AchievementsContract::unlock(env.clone(), player.clone(), Symbol::new(&env, "first"), 1);
-        AchievementsContract::unlock(env, player, Symbol::new(&env, "first"), 1);
+        define_achievement(&env, &client, "first");
+        let first = Symbol::new(&env, "first");
+        client.unlock(&player, &first, &1);
+        client.unlock(&player, &first, &1);
     }
 
     #[test]
-    fn unlock_success_and_retrieval() {
-        let (env, _) = setup();
+    fn unlock_success() {
+        let (env, _, contract_id) = setup();
+        let client = AchievementsContractClient::new(&env, &contract_id);
         let player = Address::generate(&env);
-        define_achievement(&env, "first");
-        AchievementsContract::unlock(env.clone(), player.clone(), Symbol::new(&env, "first"), 1);
-        let record = AchievementsContract::get_unlocked(
-            env, player.clone(), Symbol::new(&env, "first"),
-        )
-        .unwrap();
+        define_achievement(&env, &client, "first");
+        let first = Symbol::new(&env, "first");
+        client.unlock(&player, &first, &1);
+        let record = client.get_unlocked(&player, &first).unwrap();
         assert_eq!(record.player, player);
         assert_eq!(record.nonce, 1);
     }
 
     #[test]
+    #[should_panic]
     fn define_admin_only_enforced() {
         let env = Env::default();
         let admin = Address::generate(&env);
-        AchievementsContract::init(env.clone(), admin);
-        // Without mock_all_auths, require_auth panics for non-admin
-        let result = std::panic::catch_unwind(|| {
-            AchievementsContract::define(
-                env.clone(),
-                Symbol::new(&env, "x"),
-                Symbol::new(&env, "y"),
-                1,
-                true,
-            );
-        });
-        assert!(result.is_err());
+        let contract_id = env.register(AchievementsContract, ());
+        let client = AchievementsContractClient::new(&env, &contract_id);
+        client.init(&admin);
+        client.define(&Symbol::new(&env, "x"), &Symbol::new(&env, "y"), &1, &true);
     }
 
     #[test]
