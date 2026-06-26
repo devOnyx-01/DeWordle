@@ -15,6 +15,8 @@ export function useStellarWallet() {
     signTransaction,
     submitTransaction,
     onAccountSwitch,
+    readOnly,
+    ensureConnected,
   } = useWalletContext();
 
   return {
@@ -29,5 +31,7 @@ export function useStellarWallet() {
     signTransaction,
     submitTransaction,
     onAccountSwitch,
+    readOnly,
+    ensureConnected,
   };
 }

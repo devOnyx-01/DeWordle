@@ -31,6 +31,10 @@ type WalletState = {
   submitTransaction: (signedTxXdr: string) => Promise<{ hash: string }>;
   /** Registers a callback that fires whenever the active wallet account changes. */
   onAccountSwitch: (cb: (newAddress: string) => void) => () => void;
+  /** True when the user can browse publicly without connecting a wallet. */
+  readOnly: boolean;
+  /** Prompts the user to connect if not already connected. Returns true if connected after prompt. */
+  ensureConnected: () => Promise<boolean>;
 };
 
 type WalletKitLike = {
@@ -192,6 +196,18 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
     [network],
   );
 
+  const readOnly = useMemo(() => !connected, [connected]);
+
+  const ensureConnected = useCallback(async () => {
+    if (connected) return true;
+    try {
+      await connect();
+      return true;
+    } catch {
+      return false;
+    }
+  }, [connected, connect]);
+
   const value = useMemo(
     () => ({
       connected,
@@ -205,6 +221,8 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       signTransaction,
       submitTransaction,
       onAccountSwitch,
+      readOnly,
+      ensureConnected,
     }),
     [
       connected,
@@ -218,6 +236,8 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       signTransaction,
       submitTransaction,
       onAccountSwitch,
+      readOnly,
+      ensureConnected,
     ],
   );
 
