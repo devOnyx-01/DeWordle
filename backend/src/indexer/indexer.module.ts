@@ -13,6 +13,10 @@ import { ReplayAlertService } from './queue/replay-alert.service';
 import { IngestedEventEntity } from './entities/ingested-event.entity';
 import { SessionProjectionEntity } from './entities/session-projection.entity';
 import { IndexerCursorEntity } from './entities/indexer-cursor.entity';
+import { RegistrySnapshotEntity } from './entities/registry-snapshot.entity';
+import { RegistrySnapshotService } from './registry/registry-snapshot.service';
+import { RewardSummaryService } from './reward-summary.service';
+import { RewardSummaryController } from './reward-summary.controller';
 
 @Module({
   imports: [
@@ -20,9 +24,10 @@ import { IndexerCursorEntity } from './entities/indexer-cursor.entity';
       IngestedEventEntity,
       SessionProjectionEntity,
       IndexerCursorEntity,
+      RegistrySnapshotEntity,
     ]),
   ],
-  controllers: [IndexerController],
+  controllers: [IndexerController, RewardSummaryController],
   providers: [
     IndexerService,
     EventProcessorService,
@@ -33,6 +38,8 @@ import { IndexerCursorEntity } from './entities/indexer-cursor.entity';
     IndexerQueueService,
     ReplayAlertService,
     IndexerWorkerService,
+    RegistrySnapshotService,
+    RewardSummaryService,
   ],
   exports: [
     IndexerService,
