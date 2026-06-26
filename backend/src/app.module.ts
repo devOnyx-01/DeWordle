@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { validateEnv } from './config/env.validation';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TestEntity } from './entities/test.entity';
@@ -20,6 +21,7 @@ import { IndexerModule } from './indexer/indexer.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.development'],
+      validate: validateEnv,
     }),
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
