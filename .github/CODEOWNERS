@@ -1,0 +1,33 @@
+# Each ownership surface is maintained by a specific contributor track.
+# As legacy modules are retired or migrated, update this file to reflect
+# the current active surfaces and remove retired paths.
+
+# Default owners for everything not explicitly listed
+* @kike-alt
+
+# Frontend surfaces
+/frontend/ @kike-alt
+
+# Backend surfaces
+/backend/ @kike-alt
+
+# Soroban / Onchain surfaces
+/soroban/ @kike-alt
+/onchain/ @kike-alt
+
+# Shared libraries
+/shared/ @kike-alt
+
+# Documentation
+/docs/ @kike-alt
+/_doc/ @kike-alt
+
+# CI and Automation
+/.github/ @kike-alt
+
+# Scripts
+/scripts/ @kike-alt
+
+# Root configuration files
+/package.json @kike-alt
+/.tool-versions @kike-alt
