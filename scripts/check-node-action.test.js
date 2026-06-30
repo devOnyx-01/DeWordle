@@ -113,6 +113,32 @@ test("link-check.yml references the composite action", () => {
   );
 });
 
+test("maintained-frontend.yml references the composite action", () => {
+  const wfPath = path.join(REPO_ROOT, ".github", "workflows", "maintained-frontend.yml");
+  const content = fs.readFileSync(wfPath, "utf8");
+  assert.ok(
+    content.includes("./.github/actions/setup-node"),
+    "maintained-frontend.yml must call ./.github/actions/setup-node",
+  );
+  assert.ok(
+    !content.includes("actions/setup-node@v4"),
+    "maintained-frontend.yml must not contain an inline actions/setup-node@v4 step",
+  );
+});
+
+test("maintained-backend.yml references the composite action", () => {
+  const wfPath = path.join(REPO_ROOT, ".github", "workflows", "maintained-backend.yml");
+  const content = fs.readFileSync(wfPath, "utf8");
+  assert.ok(
+    content.includes("./.github/actions/setup-node"),
+    "maintained-backend.yml must call ./.github/actions/setup-node",
+  );
+  assert.ok(
+    !content.includes("actions/setup-node@v4"),
+    "maintained-backend.yml must not contain an inline actions/setup-node@v4 step",
+  );
+});
+
 test("toolchain-check.yml (check-node job) references the composite action", () => {
   const wfPath = path.join(
     REPO_ROOT,
